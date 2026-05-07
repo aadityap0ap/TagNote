@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const { userModel } = require("../databases/db");
+const bcrypt = require("bcrypt");
 
 const userRouter = express.Router();
 
@@ -11,7 +12,7 @@ userRouter.post("/signup", async (req, res) => {
         const password = req.body.password;
         const firstName = req.body.firstName;
         const lastName = req.body.lastName;
-        
+
         const isUserExist = await userModel.findOne({ email });
 
         if (isUserExist) {
@@ -20,9 +21,12 @@ userRouter.post("/signup", async (req, res) => {
             });
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password,salt);
+
         const user = await userModel.create({
             email,
-            password,
+            password : hashedPassword,
             firstName,
             lastName
         });
