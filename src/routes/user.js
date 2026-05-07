@@ -3,11 +3,19 @@ require("dotenv").config();
 const express = require("express");
 const { userModel } = require("../databases/db");
 const bcrypt = require("bcrypt");
+const { signUpSchema } = require("../validations/userValidations");
 
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
     try {
+        const validations = signUpSchema.safeParse(req.body);
+        if(!validations.success){
+            return res.status(400).json({
+                message : "Invalid Inputs",
+                errors : validations.error.errors
+            })
+        }
         const email = req.body.email;
         const password = req.body.password;
         const firstName = req.body.firstName;
