@@ -58,7 +58,7 @@ userRouter.post("/signin",async(req,res) => {
         const password = req.body.password;
         if(!validations.success){
             return res.status(400).json({
-                message:"Invalid Inputs",
+                message:"Invalid Inputs !",
                 error : validations.error.errors
             })
         }
