@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const { userModel } = require("../databases/db");
+const { userModel, noteModel } = require("../databases/db");
 const bcrypt = require("bcrypt");
 const {signUpInputs, signinInputs } = require("../validations/userValidations");
 const jwt = require("jsonwebtoken");
@@ -92,11 +92,19 @@ userRouter.post("/signin",async(req,res) => {
     }
 })
 
-userRouter.post("/notes",middleware,(req,res) => {
+userRouter.post("/notes",middleware,async(req,res) => {
     try{
-        return res.status(200).json({
-            message: "Checking Middlewares"
-        })
+        const{title,content,tags} = req.body;
+        const notes = await noteModel.create({
+            title,
+            content,
+            tags,
+            userId : req.userId
+        });
+        return res.status(201).json({
+            message:"Notes Created Successfully!",
+            notes
+        }) 
     }
     catch(err){
         return res.status(500).json({
