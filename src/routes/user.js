@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const {signUpInputs, signinInputs } = require("../validations/userValidations");
 const jwt = require("jsonwebtoken");
 const { JWT_USER_PASSWORD } = require("../../config");
+const middleware = require("../middlewares/middleware");
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
@@ -85,6 +86,19 @@ userRouter.post("/signin",async(req,res) => {
         })
     }
     catch(error){
+        return res.status(500).json({
+            message:"Internal Server Error!"
+        })
+    }
+})
+
+userRouter.post("/notes",middleware,(req,res) => {
+    try{
+        return res.status(200).json({
+            message: "Checking Middlewares"
+        })
+    }
+    catch(err){
         return res.status(500).json({
             message:"Internal Server Error!"
         })
