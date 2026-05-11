@@ -113,6 +113,25 @@ userRouter.post("/notes",middleware,async(req,res) => {
     }
 })
 
+userRouter.get("/notes",middleware,async(req,res) => {
+    try{
+        const notes = await noteModel.find({
+            userId : req.userId
+        }).sort({
+            createdAt : -1
+        });
+        return res.status(200).json({
+            message:"Your notes are as follows",
+            notes
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            message : "Internal Server Error!"
+        })
+    }
+})
+
 module.exports = {
     userRouter
 };
