@@ -132,6 +132,43 @@ userRouter.get("/notes",middleware,async(req,res) => {
     }
 })
 
+userRouter.put("/notes/:id",middleware,async(req,res) => {
+    try{
+        const notesId = req.params.id;
+        const{title,content,tags} = req.body;
+
+        const updateNote = await noteModel.findOneAndUpdate(
+        {
+            _id : notesId,
+            userId : req.userId
+        },
+        {
+            title,
+            content,
+            tags,
+        },
+        {
+          returnDocument : "after"
+        }
+    )
+
+    if(!updateNote){
+        return res.status(404).json({
+            message:"Notes not found!"
+        })
+    }
+    return res.status(200).json({
+        message:"Notes Updated Successfully!",
+        updateNote
+    })
+    }
+    catch(error){
+        return res.status(500).json({
+            message:"Internal Server Error!"
+        })
+    }
+})
+
 module.exports = {
     userRouter
 };
