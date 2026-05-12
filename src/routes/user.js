@@ -169,6 +169,29 @@ userRouter.put("/notes/:id",middleware,async(req,res) => {
     }
 })
 
+userRouter.delete("/notes/:id",middleware,async(req,res)=> {
+    try{
+        const notesId = req.params.id;
+        const deleteNotes = await noteModel.findOneAndDelete({
+            _id : notesId,
+            userId : req.userId,
+        });
+        if(!deleteNotes){
+            return res.status(404).json({
+                message:"Notes Not Found!"
+            })
+        }
+        return res.status(200).json({
+            message:"Notes deleted Successfully!"
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            message:"Internal Server Error!"
+        })
+    }
+})
+
 module.exports = {
     userRouter
 };
