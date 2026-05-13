@@ -7,6 +7,7 @@ const {signUpInputs, signinInputs } = require("../validations/userValidations");
 const jwt = require("jsonwebtoken");
 const { JWT_USER_PASSWORD } = require("../../config");
 const middleware = require("../middlewares/middleware");
+const { regex } = require("zod");
 const userRouter = express.Router();
 
 userRouter.post("/signup", async (req, res) => {
@@ -112,22 +113,63 @@ userRouter.post("/notes",middleware,async(req,res) => {
         })
     }
 })
+//although this get notes endpoint doing its work..but we want to do filter out contents by on the basics of search and tags..so for that we have to modify the get notes endpoint
+// userRouter.get("/notes",middleware,async(req,res) => {
+//     try{
+//         const notes = await noteModel.find({
+//             userId : req.userId
+//         }).sort({
+//             createdAt : -1
+//         });
+//         return res.status(200).json({
+//             message:"Your notes are as follows",
+//             notes
+//         })
+//     }
+//     catch(error){
+//         return res.status(500).json({
+//             message : "Internal Server Error!"
+//         })
+//     }
+// })
 
 userRouter.get("/notes",middleware,async(req,res) => {
     try{
-        const notes = await noteModel.find({
-            userId : req.userId
-        }).sort({
-            createdAt : -1
-        });
+        const search = req.query.search || "";
+        const tag = req.query.tag || "";
+        const filter = {
+            userId: req.userId,
+        };
+        //filter out on the basis of search
+        if(search){
+            filter.$or = [
+                {
+                    title:{
+                        $regex : search,
+                        $options : "i"
+                    }
+                },
+                {
+                    content:{
+                        $regex : search,
+                        $options : "i"
+                    }
+                }
+            ];
+        }
+        //filter out on the basis of tags
+        if(tag){
+            filter.tags = tag;
+        }
+        const notes = await noteModel.find(filter).sort({createdAt:-1});
         return res.status(200).json({
-            message:"Your notes are as follows",
+            message:"Notes Found Successfully!",
             notes
         })
     }
     catch(error){
         return res.status(500).json({
-            message : "Internal Server Error!"
+            mesage:"Internal Server Error!"
         })
     }
 })
