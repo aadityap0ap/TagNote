@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const { userModel, noteModel } = require("../databases/db");
 const bcrypt = require("bcrypt");
-const {signUpInputs, signinInputs } = require("../validations/userValidations");
+const {signUpInputs, signinInputs, noteSchema } = require("../validations/userValidations");
 const jwt = require("jsonwebtoken");
 const { JWT_USER_PASSWORD } = require("../../config");
 const middleware = require("../middlewares/middleware");
@@ -95,7 +95,13 @@ userRouter.post("/signin",async(req,res) => {
 
 userRouter.post("/notes",middleware,async(req,res) => {
     try{
-        const{title,content,tags} = req.body;
+        const parsedData = noteSchema.safeParse(req.body);
+        if (!parsedData.success) {
+             return res.status(400).json({
+                 message: "Invalid Inputs"
+                });
+            }
+        const{title,content,tags} = parsedData.data;
         const notes = await noteModel.create({
             title,
             content,
@@ -108,11 +114,12 @@ userRouter.post("/notes",middleware,async(req,res) => {
         }) 
     }
     catch(err){
+        console.log(err);
         return res.status(500).json({
             message:"Internal Server Error!"
         })
     }
-})
+});
 //although this get notes endpoint doing its work..but we want to do filter out contents by on the basics of search and tags..so for that we have to modify the get notes endpoint
 // userRouter.get("/notes",middleware,async(req,res) => {
 //     try{
